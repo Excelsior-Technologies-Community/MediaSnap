@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.ext.mediasnaplibrary"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 24
@@ -38,6 +36,8 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    api("com.google.android.material:material:1.11.0")
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
