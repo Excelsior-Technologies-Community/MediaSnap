@@ -15,11 +15,15 @@ import com.ext.mediasnaplibrary.theme.MediaSnapTheme
 
 class MainActivity : AppCompatActivity() {
 
-    // ✅ CAMERA PERMISSION LAUNCHER
-    private val cameraPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                openMediaSnap()
+    // ✅ CAMERA + AUDIO PERMISSION LAUNCHER
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+
+            val cameraGranted = result[Manifest.permission.CAMERA] == true
+            val audioGranted = result[Manifest.permission.RECORD_AUDIO] == true
+
+            if (cameraGranted) {
+                openMediaSnap()   // ✅ Open even if audio denied (video will be silent)
             } else {
                 Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show()
             }
@@ -31,13 +35,26 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnOpenMediaSnap).setOnClickListener {
 
-            // ✅ Check CAMERA permission properly
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-            } else {
+            val cameraOk = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+
+            val audioOk = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (cameraOk && audioOk) {
                 openMediaSnap()
+            } else {
+                // ✅ Request both permissions safely
+                permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.RECORD_AUDIO
+                    )
+                )
             }
         }
     }
