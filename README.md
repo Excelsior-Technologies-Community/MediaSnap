@@ -9,7 +9,14 @@
 
 MediaSnap is a modern, fully customizable Android Media Picker library.
 
-**It supports:**
+## Preview
+
+![Preview 1](assets/image1.jpg)
+![Demo](assets/demo.gif)
+
+---
+
+## It supports:
 ✅ CameraX Photo Capture
 
 ✅ Document Selection
