@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import android.media.MediaMetadataRetriever
 import android.widget.TextView
+import com.ext.mediasnaplibrary.config.MediaSnapConfig
 
 class MediaAdapter(
     private val items: MutableList<MediaItem>,
@@ -23,7 +24,6 @@ class MediaAdapter(
 
         val imgPlay: ImageView = view.findViewById(R.id.imgPlay)
         val txtDuration: TextView = view.findViewById(R.id.txtDuration)
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
@@ -35,18 +35,27 @@ class MediaAdapter(
     override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
         val item = items[position]
 
+        // ✅ THEME: Apply checkmark & overlay colors
+        holder.imgCheck.setColorFilter(MediaSnapConfig.theme.checkmarkColor)
+        holder.overlay.setBackgroundColor(
+            MediaSnapConfig.theme.primaryColor and 0x55FFFFFF   // semi-transparent overlay
+        )
+
         if (item.type == MediaType.VIDEO) {
 
             // ✅ Load video thumbnail frame
             Glide.with(holder.imgThumb)
                 .load(item.uri)
-                .frame(1_000_000) // 1 second frame
+                .frame(1_000_000)
                 .centerCrop()
                 .into(holder.imgThumb)
 
             // ✅ Show Play Icon & Duration
             holder.imgPlay.visibility = View.VISIBLE
             holder.txtDuration.visibility = View.VISIBLE
+
+            // ✅ THEME: Play icon color
+            holder.imgPlay.setColorFilter(MediaSnapConfig.theme.accentColor)
 
             val retriever = MediaMetadataRetriever()
             try {
@@ -87,20 +96,31 @@ class MediaAdapter(
         holder.imgCheck.visibility =
             if (item.isSelected) View.VISIBLE else View.GONE
 
-        // ✅ TAP = PREVIEW
+        // ✅ TAP = PREVIEW or DIRECT SELECT
         holder.itemView.setOnClickListener {
-            onPreview(item.uri)
+            if (MediaSnapConfig.enablePreview) {
+                onPreview(item.uri)
+            } else {
+                if (!item.isSelected && getSelectedCount() >= MediaSnapConfig.maxSelection) return@setOnClickListener
+                item.isSelected = !item.isSelected
+                notifyItemChanged(position)
+                onSelectionChanged(getSelectedCount())
+            }
+
         }
 
-        // ✅ LONG PRESS = MULTI-SELECT
+        // ✅ LONG PRESS = MULTI-SELECT WITH LIMIT
         holder.itemView.setOnLongClickListener {
+            if (!item.isSelected && getSelectedCount() >= MediaSnapConfig.maxSelection) {
+                return@setOnLongClickListener true
+            }
+
             item.isSelected = !item.isSelected
             notifyItemChanged(position)
             onSelectionChanged(getSelectedCount())
             true
         }
     }
-
 
     override fun getItemCount() = items.size
 

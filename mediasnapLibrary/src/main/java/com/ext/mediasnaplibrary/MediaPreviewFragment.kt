@@ -10,10 +10,10 @@ import android.widget.ImageView
 import android.widget.VideoView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.ext.mediasnaplibrary.core.MediaSnapResultDispatcher
 
 class MediaPreviewFragment(
-    private val uri: Uri,
-    private val onSend: (Uri) -> Unit
+    private val uri: Uri
 ) : Fragment() {
 
     override fun onCreateView(
@@ -29,12 +29,10 @@ class MediaPreviewFragment(
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
         val btnSend = view.findViewById<ImageButton>(R.id.btnSend)
 
-        // ✅ SIMPLE VIDEO DETECTION
         val isVideo =
             requireContext().contentResolver.getType(uri)?.startsWith("video") == true
 
         if (isVideo) {
-            // ✅ SHOW VIDEO
             imgPreview.visibility = View.GONE
             videoPreview.visibility = View.VISIBLE
 
@@ -45,7 +43,6 @@ class MediaPreviewFragment(
             }
 
         } else {
-            // ✅ SHOW IMAGE
             videoPreview.visibility = View.GONE
             imgPreview.visibility = View.VISIBLE
 
@@ -54,14 +51,13 @@ class MediaPreviewFragment(
                 .into(imgPreview)
         }
 
-        // ✅ BACK BUTTON
         btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // ✅ SEND CONFIRM
+        // ✅ SEND RESULT VIA CENTRAL DISPATCHER
         btnSend.setOnClickListener {
-            onSend(uri)
+            MediaSnapResultDispatcher.deliver(requireContext(), listOf(uri))
             parentFragmentManager.popBackStack()
         }
 

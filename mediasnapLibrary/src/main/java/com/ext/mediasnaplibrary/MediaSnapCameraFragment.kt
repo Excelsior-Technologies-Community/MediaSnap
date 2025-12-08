@@ -15,14 +15,14 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ext.mediasnaplibrary.config.MediaSnapConfig
+import com.ext.mediasnaplibrary.core.MediaSnapResultDispatcher
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MediaSnapCameraFragment(
-    private val onImageCaptured: (uri: android.net.Uri) -> Unit
-) : Fragment() {
+class MediaSnapCameraFragment : Fragment() {
 
     private lateinit var previewView: PreviewView
     private lateinit var imageCapture: ImageCapture
@@ -51,7 +51,12 @@ class MediaSnapCameraFragment(
         val btnSwitch = view.findViewById<ImageButton>(R.id.btnSwitch)
         val btnFlash = view.findViewById<ImageButton>(R.id.btnFlash)
 
-        btnCapture.setOnClickListener { takePhoto() }
+        btnCapture.setOnClickListener {
+            if (MediaSnapConfig.enableCameraX) {
+                takePhoto()
+            }
+        }
+
 
         btnSwitch.setOnClickListener {
             lensFacing =
@@ -70,11 +75,16 @@ class MediaSnapCameraFragment(
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-        startCamera()
+
+        // ✅ APPLY enableCameraX FLAG
+        if (MediaSnapConfig.enableCameraX) {
+            startCamera()
+        }
 
         return view
     }
 
+    // ✅ CAMERA START
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
@@ -104,11 +114,12 @@ class MediaSnapCameraFragment(
                     preview,
                     imageCapture
                 )
-            } catch (_: Exception) { }
+            } catch (_: Exception) {}
 
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    // ✅ TAKE PHOTO
     private fun takePhoto() {
         val name = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
             .format(System.currentTimeMillis())
@@ -133,28 +144,26 @@ class MediaSnapCameraFragment(
             outputOptions,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
+
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     output.savedUri?.let { uri ->
 
                         parentFragmentManager.beginTransaction()
                             .replace(
                                 android.R.id.content,
-                                MediaPreviewFragment(uri) { confirmedUri ->
-                                    onImageCaptured(confirmedUri)   // ✅ FINAL CONFIRM
-                                }
+                                MediaPreviewFragment(uri)
                             )
                             .addToBackStack(null)
                             .commit()
                     }
                 }
 
-
-
                 override fun onError(exception: ImageCaptureException) {}
             }
         )
     }
 
+    // ✅ RECENT MEDIA
     private fun loadRecentMedia() {
         val loader = MediaLoader(requireContext())
         val all = loader.loadImagesAndVideos()
@@ -168,17 +177,14 @@ class MediaSnapCameraFragment(
                 parentFragmentManager.beginTransaction()
                     .replace(
                         android.R.id.content,
-                        MediaPreviewFragment(mediaItem.uri) { confirmedUri ->
-                            onImageCaptured(confirmedUri)   // ✅ FINAL CONFIRM
-                        }
+                        MediaPreviewFragment(mediaItem.uri)
                     )
                     .addToBackStack(null)
                     .commit()
             }
     }
 
-
-        override fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
