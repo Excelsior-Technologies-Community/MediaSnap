@@ -1,5 +1,6 @@
 package com.ext.mediasnaplibrary
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -24,7 +25,26 @@ class PickerHostFragment : Fragment() {
         recyclerView = RecyclerView(requireContext())
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 
-        adapter = MediaAdapter(mediaList)
+        adapter = MediaAdapter(
+            mediaList,
+            onSelectionChanged = { selectedCount ->
+                // optional
+            },
+            onPreview = { uri ->
+                parentFragmentManager.beginTransaction()
+                    .replace(
+                        android.R.id.content,
+                        MediaPreviewFragment(uri) { confirmedUri ->
+                            // ✅ RETURN SELECTED IMAGE TO ACTIVITY
+                            Log.d("MediaSnap", "Confirmed from gallery: $confirmedUri")
+                        }
+                    )
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
+
+
         recyclerView.adapter = adapter
 
         loadMedia()

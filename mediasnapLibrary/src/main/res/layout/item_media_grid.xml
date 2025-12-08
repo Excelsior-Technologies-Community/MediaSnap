@@ -1,0 +1,55 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="120dp">
+
+    <ImageView
+        android:id="@+id/imgThumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <!-- Dark overlay when selected -->
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone" />
+
+    <!-- ▶ PLAY ICON -->
+    <ImageView
+        android:id="@+id/imgPlay"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
+        android:src="@android:drawable/ic_media_play"
+        android:visibility="gone"
+        app:tint="@android:color/white" />
+
+    <!-- DURATION -->
+    <TextView
+        android:id="@+id/txtDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="6dp"
+        android:text="00:00"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:background="#80000000"
+        android:padding="4dp"
+        android:visibility="gone"/>
+
+
+    <!-- Checkmark -->
+    <ImageView
+        android:id="@+id/imgCheck"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:visibility="gone" />
+
+</FrameLayout>

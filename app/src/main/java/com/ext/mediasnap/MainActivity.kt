@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.ext.mediasnaplibrary.MediaPicker
 import com.ext.mediasnaplibrary.MediaSnapBottomSheet
+import com.ext.mediasnaplibrary.MediaSnapCameraFragment
 import com.ext.mediasnaplibrary.PickerHostFragment
 
 class MainActivity : AppCompatActivity() {
@@ -19,7 +20,16 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.RequestPermission()
         ) { granted ->
             if (granted) {
-                openCamera()
+                supportFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.main,
+                        MediaSnapCameraFragment { uri ->
+                            Log.d("MediaSnap", "Captured from CameraX: $uri")
+                        }
+                    )
+                    .addToBackStack(null)
+                    .commit()
+
             } else {
                 Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show()
             }
@@ -60,7 +70,15 @@ class MainActivity : AppCompatActivity() {
                     if (checkSelfPermission(Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED
                     ) {
-                        openCamera()
+                        supportFragmentManager.beginTransaction()
+                            .replace(
+                                R.id.main,
+                                MediaSnapCameraFragment { uri ->
+                                    Log.d("MediaSnap", "Captured from CameraX: $uri")
+                                }
+                            )
+                            .addToBackStack(null)
+                            .commit()
                     } else {
                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                     }
@@ -101,13 +119,6 @@ class MainActivity : AppCompatActivity() {
 
             sheet.show(supportFragmentManager, "MediaSnapSheet")
         }
-    }
-    private fun openCamera() {
-        MediaPicker.with(this)
-            .camera()
-            .start { uris ->
-                Log.d("MediaSnap", "Camera captured: $uris")
-            }
     }
 
     private fun openGalleryGrid() {
