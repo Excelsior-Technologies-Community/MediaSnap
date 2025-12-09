@@ -57,7 +57,7 @@ dependencyResolutionManagement {
 **2️⃣ Add Dependency**
 ```
 dependencies {
-    implementation("com.github.Excelsior-Technologies-Community:MediaSnap:1.0.0")
+    implementation("com.github.Excelsior-Technologies-Community:MediaSnap:1.0.1")
 }
 ```
 ---
